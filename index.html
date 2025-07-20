@@ -121,6 +121,11 @@
             padding: 1em;
             background: rgba(255, 255, 255, 0.05);
         }
+        .tableau-embed p.error {
+            color: #ff6b6b;
+            font-size: 1em;
+            display: none;
+        }
         .insights, .about, .contact {
             background: linear-gradient(45deg, #1a1a3b, #2d3748);
             color: #e0e0e0;
@@ -177,6 +182,7 @@
     </style>
 </head>
 <body>
+    <!-- IMPORTANT: Host this file on an HTTPS web server to ensure Tableau iframes load correctly. Local file access (file://) may cause CORS issues. -->
     <header>
         <h1>Data Analytics Nexus</h1>
         <p>Pioneering Insights for a Data-Driven Future</p>
@@ -206,30 +212,34 @@
             <div class="tableau-embed active" id="dashboard-1">
                 <h3>Sales Performance Dashboard</h3>
                 <div>
-                    <iframe data-src="https://public.tableau.com/views/project_dashboard1_17530295420480/sheet3?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <iframe data-src="https://public.tableau.com/views/project_dashboard1_17530295420480/sheet3?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
                 </div>
                 <p>Analyze sales metrics and regional performance trends.</p>
+                <p class="error" id="error-1">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
             </div>
             <div class="tableau-embed" id="dashboard-2">
                 <h3>Customer Trends Dashboard</h3>
                 <div>
-                    <iframe data-src="https://public.tableau.com/views/project_dashboard2_17530295852970/sheet7?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <iframe data-src="https://public.tableau.com/views/project_dashboard2_17530295852970/sheet7?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
                 </div>
                 <p>Explore customer behavior and engagement patterns.</p>
+                <p class="error" id="error-2">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
             </div>
             <div class="tableau-embed" id="dashboard-3">
                 <h3>Market Analysis Dashboard</h3>
                 <div>
-                    <iframe data-src="https://public.tableau.com/views/project_dashboard3_17530296280710/sheet11?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <iframe data-src="https://public.tableau.com/views/project_dashboard3_17530296280710/sheet11?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
                 </div>
                 <p>Identify market opportunities and competitive trends.</p>
+                <p class="error" id="error-3">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
             </div>
             <div class="tableau-embed" id="dashboard-4">
                 <h3>Operational Efficiency Dashboard</h3>
                 <div>
-                    <iframe data-src="https://public.tableau.com/views/project_dashboard4_17530296781390/sheet13?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <iframe data-src="https://public.tableau.com/views/project_dashboard4_17530296781390/sheet13?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
                 </div>
                 <p>Optimize operations with data-driven insights.</p>
+                <p class="error" id="error-4">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
             </div>
         </div>
         <div class="section insights" id="insights">
@@ -282,17 +292,26 @@
         function showDashboard(index) {
             document.querySelectorAll('.tableau-embed').forEach(embed => {
                 embed.classList.remove('active');
+                embed.querySelector('.error').style.display = 'none';
             });
             document.querySelectorAll('.dashboard-toggle button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.getElementById(`dashboard-${index}`).classList.add('active');
+            const activeEmbed = document.getElementById(`dashboard-${index}`);
+            activeEmbed.classList.add('active');
             document.querySelector(`.dashboard-toggle button:nth-child(${index})`).classList.add('active');
 
             // Lazy load iframe
-            const iframe = document.getElementById(`dashboard-${index}`).querySelector('iframe');
+            const iframe = activeEmbed.querySelector('iframe');
             if (!iframe.src) {
                 iframe.src = iframe.getAttribute('data-src');
+                iframe.onload = () => {
+                    console.log(`Dashboard ${index} loaded successfully`);
+                };
+                iframe.onerror = () => {
+                    console.error(`Failed to load dashboard ${index}`);
+                    document.getElementById(`error-${index}`).style.display = 'block';
+                };
             }
         }
 
