@@ -126,6 +126,14 @@
             font-size: 1em;
             display: none;
         }
+        .tableau-embed .loading {
+            display: none;
+            color: #00d4ff;
+            font-style: italic;
+        }
+        .tableau-embed.active .loading {
+            display: block;
+        }
         .insights, .about, .contact {
             background: linear-gradient(45deg, #1a1a3b, #2d3748);
             color: #e0e0e0;
@@ -178,6 +186,10 @@
             .section { padding: 2em; }
             .dashboard-toggle { flex-wrap: wrap; }
             .dashboard-toggle button { margin: 0.5em; }
+            .tableau-embed iframe {
+                max-width: 100%;
+                height: auto;
+            }
         }
     </style>
 </head>
@@ -202,7 +214,7 @@
         </div>
         <div class="section" id="dashboards">
             <h2>Interactive Data Visualizations</h2>
-            <p>Navigate our advanced dashboards to uncover transformative insights.</p>
+            <p>המערכת מתבססת על נתונים פיקטיביים של חברת "ביוטיק ליין בע"מ", חברה המתמחה בייבוא ושיווק מוצרי איפור וטיפוח יוקרתיים, המיועדים ללקוחות פרטיים והן ללקוחות עסקיים, ומופצים באמצעות פלטפורמות דיגיטאליות ופיזיות כאחד. המערכת נועדה לשמש ככלי תומך החלטה עבור מקבלי החלטות בחברה, כגון: מנהלי מכירות, שיווק ולוגיסטיקה. תכליתה העיקרית היא לאפשר זיהוי מגמות מכירה, איתור פוטנציאל בתהליכי הפצה וסיוע בקבלת החלטות אסטרטגיות, כמו: קביעת מדיניות תמחור והנחות, זיהוי מוצרים בעלי ביקוש נמוך או מלאי גבוה שצריכים הוזלה לעומת מוצרים פופולאריים המאפשרים העלאת מחירים, מיטוב ערוצי הפצה והערכת יעילותם של ערוצי המכירה השונים לצורך מיקוד משאבים, וייעול תהליכי טיפול בהזמנות דרך ניתוח משך זמן הטיפול הממוצע בהזמנות לפי סוג לקוחה וקטגוריית מוצר.</p>
             <div class="dashboard-toggle">
                 <button class="active" onclick="showDashboard(1)">Sales</button>
                 <button onclick="showDashboard(2)">Customers</button>
@@ -213,33 +225,37 @@
                 <h3>Sales Performance Dashboard</h3>
                 <div>
                     <iframe data-src="https://public.tableau.com/views/project_dashboard1_17530295420480/sheet3?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <p class="loading">Loading dashboard, please wait...</p>
                 </div>
                 <p>Analyze sales metrics and regional performance trends.</p>
-                <p class="error" id="error-1">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
+                <p class="error" id="error-1">Error loading dashboard. Please ensure the file is hosted on an HTTPS server and the link is public, then try refreshing.</p>
             </div>
             <div class="tableau-embed" id="dashboard-2">
                 <h3>Customer Trends Dashboard</h3>
                 <div>
                     <iframe data-src="https://public.tableau.com/views/project_dashboard2_17530295852970/sheet7?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <p class="loading">Loading dashboard, please wait...</p>
                 </div>
                 <p>Explore customer behavior and engagement patterns.</p>
-                <p class="error" id="error-2">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
+                <p class="error" id="error-2">Error loading dashboard. Please ensure the file is hosted on an HTTPS server and the link is public, then try refreshing.</p>
             </div>
             <div class="tableau-embed" id="dashboard-3">
                 <h3>Market Analysis Dashboard</h3>
                 <div>
                     <iframe data-src="https://public.tableau.com/views/project_dashboard3_17530296280710/sheet11?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <p class="loading">Loading dashboard, please wait...</p>
                 </div>
                 <p>Identify market opportunities and competitive trends.</p>
-                <p class="error" id="error-3">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
+                <p class="error" id="error-3">Error loading dashboard. Please ensure the file is hosted on an HTTPS server and the link is public, then try refreshing.</p>
             </div>
             <div class="tableau-embed" id="dashboard-4">
                 <h3>Operational Efficiency Dashboard</h3>
                 <div>
                     <iframe data-src="https://public.tableau.com/views/project_dashboard4_17530296781390/sheet13?:language=en-US&:embed=y&:showVizHome=n&:display_count=n&:origin=viz_share_link" width="100%" height="600px" frameborder="0"></iframe>
+                    <p class="loading">Loading dashboard, please wait...</p>
                 </div>
                 <p>Optimize operations with data-driven insights.</p>
-                <p class="error" id="error-4">Error loading dashboard. Please ensure the link is public and try refreshing.</p>
+                <p class="error" id="error-4">Error loading dashboard. Please ensure the file is hosted on an HTTPS server and the link is public, then try refreshing.</p>
             </div>
         </div>
         <div class="section insights" id="insights">
@@ -288,7 +304,7 @@
         }, { threshold: 0.2 });
         sections.forEach(section => observer.observe(section));
 
-        // Dashboard toggle functionality
+        // Dashboard toggle functionality with retry
         function showDashboard(index) {
             document.querySelectorAll('.tableau-embed').forEach(embed => {
                 embed.classList.remove('active');
@@ -301,17 +317,30 @@
             activeEmbed.classList.add('active');
             document.querySelector(`.dashboard-toggle button:nth-child(${index})`).classList.add('active');
 
-            // Lazy load iframe
+            // Lazy load iframe with enhanced retry logic
             const iframe = activeEmbed.querySelector('iframe');
             if (!iframe.src) {
-                iframe.src = iframe.getAttribute('data-src');
-                iframe.onload = () => {
-                    console.log(`Dashboard ${index} loaded successfully`);
+                let attempts = 0;
+                const maxAttempts = 3;
+                const loadIframe = () => {
+                    iframe.src = iframe.getAttribute('data-src');
+                    iframe.onload = () => {
+                        console.log(`Dashboard ${index} loaded successfully`);
+                        activeEmbed.querySelector('.loading').style.display = 'none';
+                    };
+                    iframe.onerror = () => {
+                        attempts++;
+                        if (attempts <= maxAttempts) {
+                            console.warn(`Retry attempt ${attempts} for dashboard ${index}`);
+                            setTimeout(loadIframe, 2000); // Retry after 2 seconds
+                        } else {
+                            console.error(`Failed to load dashboard ${index} after ${maxAttempts} attempts`);
+                            document.getElementById(`error-${index}`).style.display = 'block';
+                            activeEmbed.querySelector('.loading').style.display = 'none';
+                        }
+                    };
                 };
-                iframe.onerror = () => {
-                    console.error(`Failed to load dashboard ${index}`);
-                    document.getElementById(`error-${index}`).style.display = 'block';
-                };
+                loadIframe();
             }
         }
 
